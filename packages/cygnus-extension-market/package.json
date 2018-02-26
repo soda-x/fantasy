@@ -1,0 +1,10 @@
+{
+  "name": "cygnus-extension-market",
+  "version": "0.0.1",
+  "description": "cygnus extension market",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": "pigcan <jinangjay818@gmail.com>",
+  "license": "MIT"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "cygnus-env-setup",
+  "version": "0.0.1",
+  "description": "node and cnpm setup. Provide a build-in node and cnpm ( yarn or pnpm like).",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": "pigcan <jinangjay818@gmail.com>",
+  "license": "MIT"
+}

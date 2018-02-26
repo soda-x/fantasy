@@ -1,0 +1,10 @@
+{
+  "name": "cygnus-util",
+  "version": "0.0.1",
+  "description": "Some utils that help you with organizing common codes",
+  "main": "index.js",
+  "scripts": {
+  },
+  "author": "pigcan <jinangjay818@gmail.com>",
+  "license": "MIT"
+}
