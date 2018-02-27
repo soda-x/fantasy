@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-
+    "precommit": "lint-staged",
+    "test": ""
   },
   "lint-staged": {
     "*.js": [
