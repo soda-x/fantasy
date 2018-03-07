@@ -1,6 +1,9 @@
 {
   "private": true,
   "scripts": {
+    "changelog": "lerna-changelog",
+    "postinstall": "lerna bootstrap",
+    "lint": "eslint --ignore-path .gitignore packages/**/ --fix",
     "precommit": "lint-staged",
     "test": ""
   },
