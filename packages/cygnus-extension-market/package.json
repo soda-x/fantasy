@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "description": "cygnus extension market",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
     "cygnus-env-setup": "^0.0.1",
-    "cygnus-util": "^0.0.1"
+    "cygnus-util": "^0.0.1",
+    "mkdirp": "^0.5.1",
+    "p-queue": "^2.3.1",
+    "path-is-absolute": "^1.0.1"
   },
   "author": "pigcan <jinangjay818@gmail.com>",
   "license": "MIT"
