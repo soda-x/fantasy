@@ -4,7 +4,29 @@
   "description": "node and cnpm setup. Provide a build-in node and cnpm ( yarn or pnpm like).",
   "main": "index.js",
   "scripts": {
+    "test": "DEBUG=1 nyc --reporter=lcov --reporter=text ava",
+    "ci": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "pigcan <jinangjay818@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cygnus-util": "0.0.1"
+  },
+  "devDependencies": {
+    "ava": "^0.25.0",
+    "coveralls": "^3.0.0",
+    "nyc": "^11.4.1"
+  },
+  "ava": {
+    "files": [
+      "__test__/**/*.js"
+    ],
+    "concurrency": 5
+  },
+  "nyc": {
+    "exclude": [
+      "node_modules",
+      "__test__"
+    ]
+  }
 }
