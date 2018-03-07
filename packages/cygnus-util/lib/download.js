@@ -66,11 +66,9 @@ function tryToDownload(
           url,
           destination,
           dlOptions,
-          logsPath,
-          isOutput,
+          0,
           resolve,
-          reject,
-          0
+          reject
         );
       } else {
         reject(err);
