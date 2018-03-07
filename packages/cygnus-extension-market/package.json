@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
   },
+  "dependencies": {
+    "cygnus-env-setup": "^0.0.1",
+    "cygnus-util": "^0.0.1"
+  },
   "author": "pigcan <jinangjay818@gmail.com>",
   "license": "MIT"
 }
