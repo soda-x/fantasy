@@ -21,7 +21,7 @@ class DownloadManager {
     if (enforcer !== downloadManager) {
       throw new Error('Cannot construct singleton');
     }
-    this.prefix = 'UNIVERSAL';
+    this._suffix = 'UNIVERSAL';
     this._type = 'DownloadManager';
     this.queue = new Queue({concurrency:1});
   }
@@ -38,16 +38,16 @@ class DownloadManager {
   set type(value) {
     this._type = value;
   }
-  get prefix() {
-    return this.prefix;
+  get suffix() {
+    return this._suffix;
   }
-  set prefix(value) {
-    this.prefix = value;
+  set suffix(value) {
+    this._suffix = value;
   }
   downloadAPackage(path = '', name = '', version = 'latest') {
     let dlPath = path;
     if (!dlPath || !pathIsAbsolute(path)) {
-      dlPath = join(getDownloadDir(this.prefix), dlPath)
+      dlPath = join(getDownloadDir(this._suffix), dlPath)
     }
     if (!existsSync(dlPath)) {
       mkdirp.sync(dlPath);

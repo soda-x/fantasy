@@ -10,7 +10,7 @@ const { log } = logUtil;
 
 /**
  *
- * @param {string} prefix: prefix of download dir name, more see cygnus/util/lib/path.js
+ * @param {string} suffix: suffix of download dir name, more see cygnus/util/lib/path.js
  * @param {string} cwd: current working directory
  * @param {string} packageName: package name
  * @param {string} version: package version
@@ -18,7 +18,7 @@ const { log } = logUtil;
  * @returns {Promise<any>}
  */
 module.exports.install = async function install({
-  prefix = 'UNIVERSAL',
+  suffix = 'BIN',
   cwd,
   packageName = '',
   version = 'latest',
@@ -36,7 +36,7 @@ module.exports.install = async function install({
   let cnpmPath = '';
   let errObj;
   try {
-    const { cnpm, node } = await setupNodeAndCnpmEnvironment(prefix);
+    const { cnpm, node } = await setupNodeAndCnpmEnvironment(suffix);
     cnpmPath = cnpm;
     nodePath = dirname(node);
   } catch (err) {

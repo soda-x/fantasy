@@ -5,7 +5,7 @@ const { existsSync } = require('fs');
 const os = require('os');
 
 const { pathUtil, downloadUtil, logUtil } = require('cygnus-util');
-const { getDownloadDir } = pathUtil;
+const { getDownloadDirOfBin } = pathUtil;
 const { download } = downloadUtil;
 const { log } = logUtil;
 
@@ -16,8 +16,8 @@ const { log } = logUtil;
 function getEncloseCnpmRemotePath() {
   const isWin32 = os.platform() === 'win32';
   const cnpmRemotePath = isWin32
-    ? 'http://p.tb.cn/rmsportal_5906_cnpm-v5.2.0-win-x64.zip'
-    : 'http://p.tb.cn/rmsportal_5906_cnpm-v5.2.0-darwin-x64.tar.gz';
+    ? 'http://p.tb.cn/rmsportal_5906_cnpm-v5.0.0-win-x64.zip'
+    : 'http://p.tb.cn/rmsportal_5906_cnpm-v5.0.0-darwin-x64.tar.gz';
 
   return cnpmRemotePath;
 }
@@ -37,15 +37,15 @@ function getNodeRemotePath() {
 
 /**
  * setup node and cnpm
- * @param {string} prefix - default 'UNIVERSAL'
+ * @param {string} suffix - default 'UNIVERSAL'
  */
-function setupNodeAndCnpmEnvironment(prefix) {
+function setupNodeAndCnpmEnvironment(suffix) {
   const isWin32 = os.platform() === 'win32';
   // remote cnpm node url
   const cnpmRemotePath = getEncloseCnpmRemotePath();
   const nodeRemotePath = getNodeRemotePath();
   // local path
-  const downloadDir = join(getDownloadDir(prefix), 'bin');
+  const downloadDir = join(getDownloadDirOfBin(suffix));
   const cnpmPath = join(downloadDir, isWin32 ? 'cnpm.exe' : 'cnpm');
   const nodePath = join(
     downloadDir,
