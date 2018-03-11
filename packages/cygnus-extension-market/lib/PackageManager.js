@@ -4,10 +4,10 @@ const { sep, join, dirname } = require('path');
 
 const set = require('lodash.set');
 const merge = require('lodash.merge');
-const cloneDeep = require('lodash.clonedeep')
+const cloneDeep = require('lodash.clonedeep');
 const map = require('lodash.map');
 const { readJson } = require('fs-extra');
-const semver = require('semver')
+const semver = require('semver');
 const pathIsAbsolute = require('path-is-absolute');
 const rimraf = require('rimraf');
 
@@ -15,8 +15,9 @@ const { pathUtil, networkUtil, cnpmUtil } = require('cygnus-util');
 
 const { getDownloadDir } = pathUtil;
 const { doRequest, isAliEnv } = networkUtil;
-const { getSearchURL, getNamedPackageInfoURL, getWhiteList } = cnpmUtil;
+const { getSearchURL, getNamedPackageInfoURL } = cnpmUtil;
 
+const getWhiteList = require('./util/doWhiteRequest');
 const DownloadManager = require('./DownloadManager');
 const StatusJSONManager = require('./StatusJSONManager');
 
@@ -70,12 +71,12 @@ class PackageManager {
       }
       const packageListURL = getSearchURL(this.isAli, this.prefix);
       const packageListResponse = await doRequest(packageListURL);
-      if (!process.env.IGNORE_WhiteList) {
+      if (!process.env.IGNORE_WhiteList && this.whiteListUrl) {
         const whiteList = await getWhiteList(this.whiteListUrl);
         if (whiteList.length) {
           const list = map(whiteList, 'name');
           const packages = packageListResponse.packages;
-          const filterPackages = packages.filter((pkg) => {
+          const filterPackages = packages.filter(pkg => {
             if (list.indexOf(pkg.name) > -1) {
               return true;
             }
@@ -111,7 +112,7 @@ class PackageManager {
           const whiteList = await getWhiteList(this.whiteListUrl);
           if (whiteList.length) {
             const list = map(whiteList, 'name');
-            const filterPackages = packageList.filter((pkg) => {
+            const filterPackages = packageList.filter(pkg => {
               if (list.indexOf(pkg.name) > -1) {
                 return true;
               }
@@ -124,36 +125,43 @@ class PackageManager {
         } else {
           filterPackageList = packageList;
         }
-        for (let i = 0; i < filterPackageList.length; i ++) {
-          packageInfoList.push(doRequest(getNamedPackageInfoURL(this.isAli, filterPackageList[i]['name'])));
+        for (let i = 0; i < filterPackageList.length; i++) {
+          packageInfoList.push(
+            doRequest(
+              getNamedPackageInfoURL(this.isAli, filterPackageList[i]['name'])
+            )
+          );
         }
         let allPakcagesInfo = await Promise.all(packageInfoList);
         allPakcagesInfo = this.normalizePackagesInfo(allPakcagesInfo, true);
-        this.packagers = Object.keys(allPakcagesInfo).reduce((prev, pkgName) => {
-          const pkg = allPakcagesInfo[pkgName];
-          let obj = {};
-          if (pkg.type === 0) {
-            obj = {
-              Project: {
-                [pkgName]: {
-                  [pkgName]: pkg,
+        this.packagers = Object.keys(allPakcagesInfo).reduce(
+          (prev, pkgName) => {
+            const pkg = allPakcagesInfo[pkgName];
+            let obj = {};
+            if (pkg.type === 0) {
+              obj = {
+                Project: {
+                  [pkgName]: {
+                    [pkgName]: pkg,
+                  },
                 },
-              },
+              };
             }
-          }
-          if (pkg.type === 1) {
-            obj = {
-              Plugin: {
-                [pkgName]: {
-                  [pkgName]: pkg,
+            if (pkg.type === 1) {
+              obj = {
+                Plugin: {
+                  [pkgName]: {
+                    [pkgName]: pkg,
+                  },
                 },
-              },
+              };
             }
-          }
-          obj = merge(prev, obj);
+            obj = merge(prev, obj);
 
-          return obj;
-        }, {});
+            return obj;
+          },
+          {}
+        );
         ret = [null, this.packagers];
       }
     } catch (err) {
@@ -188,13 +196,18 @@ class PackageManager {
       let iconForSearch = '';
       let ideDeps = [];
       let disableUninstall = false;
+      let link = '';
       if (type !== 2) {
-        cname = pkg.cygnus.cname || pkg.cygnus.description.cname || pkg.cygnus.description.name || '';
-        iconForSearch = pkg.cygnus.description.iconForSearch || '';
+        const description = pkg.cygnus.description;
+        cname =
+          pkg.cygnus.cname ||
+          (description && description.cname && description.name) ||
+          '';
+        iconForSearch = (description && description.iconForSearch) || '';
         ideDeps = pkg.cygnus.plugins || [];
         disableUninstall = pkg.cygnus.disableUninstall || false;
+        link = (description && description.link) || '';
       }
-      const link = pkg.cygnus.description.link || '';
 
       let newPkg = {
         type,
@@ -214,12 +227,12 @@ class PackageManager {
         disableUninstall,
         dependencies: pkg.dependencies,
         readme: pkg.readme || '空空如也',
-      }
+      };
       if (rawMode) {
         newPkg = Object.assign(newPkg, {
           versionsList: pkg.versionsList,
           ['dist-tags']: pkg['dist-tags'],
-        })
+        });
       }
       const newObj = Object.assign({}, prev, {
         [pkg.name]: newPkg,
@@ -241,14 +254,14 @@ class PackageManager {
     // 存在下载信息
     if (dlType.length) {
       // 类型循环
-      dlType.forEach((t) => {
+      dlType.forEach(t => {
         const items = Object.keys(downloadInfo[t]);
         if (items.length) {
           // 主体循环
-          items.forEach((parent) => {
+          items.forEach(parent => {
             const childs = Object.keys(downloadInfo[t][parent]);
             if (childs.length) {
-              childs.forEach((child) => {
+              childs.forEach(child => {
                 const p = downloadInfo[t][parent][child];
                 if (p.status === 'installing') {
                   if (parent === child) {
@@ -266,7 +279,7 @@ class PackageManager {
 
     if (name && typeof name === 'string' && type.indexOf([0, 1]) > -1) {
       const typ = type === 0 ? 'Project' : 'Plugin';
-      return downloadInfo[typ][name]
+      return downloadInfo[typ][name];
     }
 
     return downloadInfo;
@@ -338,12 +351,16 @@ class PackageManager {
                   pkg.status = 'outdate';
                   pkg.latestVersion = distTags[version];
                   packages.Plugin[project][name].status = 'outdate';
-                  packages.Plugin[project][name].latestVersion = distTags[version];
+                  packages.Plugin[project][name].latestVersion =
+                    distTags[version];
                 }
               }
               // situation 2: use semver
-              versionsList.some((ver) => {
-                if (semver.satisfies(ver, version) && semver.gt(ver, aversion)) {
+              versionsList.some(ver => {
+                if (
+                  semver.satisfies(ver, version) &&
+                  semver.gt(ver, aversion)
+                ) {
                   pkg.status = 'outdate';
                   pkg.latestVersion = ver;
                   packages.Plugin[project][name].status = 'outdate';
@@ -400,13 +417,16 @@ class PackageManager {
                   pkg.status = 'outdate';
                   pkg.latestVersion = distTags[version];
                   packages.Plugin[plugin][name].status = 'outdate';
-                  packages.Plugin[plugin][name].latestVersion = distTags[version];
-
+                  packages.Plugin[plugin][name].latestVersion =
+                    distTags[version];
                 }
               }
               // situation 2: use semver
-              versionsList.some((ver) => {
-                if (semver.satisfies(ver, version) && semver.gt(ver, aversion)) {
+              versionsList.some(ver => {
+                if (
+                  semver.satisfies(ver, version) &&
+                  semver.gt(ver, aversion)
+                ) {
                   pkg.status = 'outdate';
                   pkg.latestVersion = ver;
                   packages.Plugin[plugin][name].status = 'outdate';
@@ -452,26 +472,34 @@ class PackageManager {
     const needToAnalysisPakcages = Array.isArray(pkgs) ? pkgs : [pkgs];
     const installListObj = {};
     if (needToAnalysisPakcages.length > 0) {
-      for (let i = 0; i < needToAnalysisPakcages.length; i ++) {
+      for (let i = 0; i < needToAnalysisPakcages.length; i++) {
         const pkg = needToAnalysisPakcages[i];
         const type = PackageManager.getPackageType(pkg);
         if (type === 0) {
           // project itself
           set(installListObj, `Project.${pkg.name}.${pkg.name}`, pkg.version);
           // get plugins list
-          const plugins = pkg.cygnus && pkg.cygnus.plugins || [];
+          const plugins = (pkg.cygnus && pkg.cygnus.plugins) || [];
           if (plugins.length) {
-            for (let i = 0; i < plugins.length; i ++) {
-              set(installListObj, `Project.${pkg.name}.${plugins[i].name}`, plugins[i].version);
+            for (let i = 0; i < plugins.length; i++) {
+              set(
+                installListObj,
+                `Project.${pkg.name}.${plugins[i].name}`,
+                plugins[i].version
+              );
             }
           }
         }
         if (type === 1) {
           set(installListObj, `Plugin.${pkg.name}`, pkg.version);
-          const plugins = pkg.cygnus && pkg.cygnus.plugins || [];
+          const plugins = (pkg.cygnus && pkg.cygnus.plugins) || [];
           if (plugins.length) {
-            for (let i = 0; i < plugins.length; i ++) {
-              set(installListObj, `Project.${pkg.name}.${plugins[i].name}`, plugins[i].version);
+            for (let i = 0; i < plugins.length; i++) {
+              set(
+                installListObj,
+                `Project.${pkg.name}.${plugins[i].name}`,
+                plugins[i].version
+              );
             }
           }
         }
@@ -500,7 +528,9 @@ class PackageManager {
               const name = item;
               const version = project[item];
               const subDir = `Project${sep}${projectName}${sep}${name}@${version}`;
-              dl.push(this.downloadManager.downloadAPackage(subDir, name, version));
+              dl.push(
+                this.downloadManager.downloadAPackage(subDir, name, version)
+              );
             }
           }
         }
@@ -509,18 +539,24 @@ class PackageManager {
           dlLocalInfo = {
             Project: {
               [pkg.name]: [],
-            }
+            },
           };
           const dlNameAndVersionObj = dlRes.reduce((prev, dlItem) => {
             return Object.assign({}, prev, {
               [dlItem.name]: {
                 version: dlItem.version,
-                path: join(dlItem.path, `node_modules${sep}${dlItem.name}${sep}package.json`),
+                path: join(
+                  dlItem.path,
+                  `node_modules${sep}${dlItem.name}${sep}package.json`
+                ),
               },
             });
           }, {});
           const dlResPkgList = dlRes.reduce((prev, dlItem) => {
-            const dlItemPkgPath = join(dlItem.path, `node_modules${sep}${dlItem.name}${sep}package.json`);
+            const dlItemPkgPath = join(
+              dlItem.path,
+              `node_modules${sep}${dlItem.name}${sep}package.json`
+            );
             prev.push(readJson(dlItemPkgPath));
 
             return prev;
@@ -529,11 +565,16 @@ class PackageManager {
           const dlRestPkg = await Promise.all(dlResPkgList);
 
           const mixResPkg = dlRestPkg.reduce((prev, apkg) => {
-            const newPkg = Object.assign({}, apkg, {
-              aversion: apkg.version,
-              enable: true,
-              // 1月25日 去除，问题是 installling 中间态导致获取所有安装模块失败，因为installing 被认为是一个并未安装状态，status: 'installing',
-            }, dlNameAndVersionObj[apkg.name]);
+            const newPkg = Object.assign(
+              {},
+              apkg,
+              {
+                aversion: apkg.version,
+                enable: true,
+                // 1月25日 去除，问题是 installling 中间态导致获取所有安装模块失败，因为installing 被认为是一个并未安装状态，status: 'installing',
+              },
+              dlNameAndVersionObj[apkg.name]
+            );
             prev.push(newPkg);
 
             return prev;
@@ -574,7 +615,9 @@ class PackageManager {
               const name = item;
               const version = plugin[item];
               const subDir = `Plugin${sep}${pluginName}${sep}${name}@${version}`;
-              dl.push(this.downloadManager.downloadAPackage(subDir, name, version));
+              dl.push(
+                this.downloadManager.downloadAPackage(subDir, name, version)
+              );
             }
           }
         }
@@ -583,31 +626,42 @@ class PackageManager {
           dlLocalInfo = {
             Plugin: {
               [pkg.name]: [],
-            }
+            },
           };
           const dlNameAndVersionObj = dlRes.reduce((prev, dlItem) => {
             return Object.assign({}, prev, {
               [dlItem.name]: {
                 version: dlItem.version,
-                path: join(dlItem.path, `node_modules${sep}${dlItem.name}${sep}package.json`),
+                path: join(
+                  dlItem.path,
+                  `node_modules${sep}${dlItem.name}${sep}package.json`
+                ),
               },
             });
           }, {});
           const dlResPkgList = dlRes.reduce((prev, dlItem) => {
-            const dlItemPkgPath = join(dlItem.path, `node_modules${sep}${dlItem.name}${sep}package.json`);
+            const dlItemPkgPath = join(
+              dlItem.path,
+              `node_modules${sep}${dlItem.name}${sep}package.json`
+            );
             prev.push(readJson(dlItemPkgPath));
 
             return prev;
           }, []);
 
-          const dlRestPkg = await Promise.all(dlResPkgList)
+          const dlRestPkg = await Promise.all(dlResPkgList);
 
           const mixResPkg = dlRestPkg.reduce((prev, apkg) => {
-            const newPkg = Object.assign({}, apkg, {
-              aversion: apkg.version,
-              enable: true,
-              status: 'installing',
-            }, dlNameAndVersionObj[apkg.name]);
+            const newPkg = Object.assign(
+              {},
+              apkg,
+              {
+                aversion: apkg.version,
+                enable: true,
+                status: 'installing',
+              },
+              dlNameAndVersionObj[apkg.name]
+            );
             prev.push(newPkg);
 
             return prev;
@@ -641,9 +695,9 @@ class PackageManager {
       const projects = Object.keys(projectsObj);
       const plugins = Object.keys(pluginsObj);
       // project
-      projects.forEach((projectName) => {
+      projects.forEach(projectName => {
         const items = Object.keys(projectsObj[projectName]);
-        items.forEach((item) => {
+        items.forEach(item => {
           const childObj = projectsObj[projectName][item];
           if (childObj.path === path || dirname(childObj.path) === path) {
             parent = projectName;
@@ -652,11 +706,11 @@ class PackageManager {
       });
       if (!parent) {
         // plugin
-        plugins.forEach((pluginName) => {
+        plugins.forEach(pluginName => {
           const items = Object.keys(pluginsObj[pluginName]);
-          items.forEach((item) => {
+          items.forEach(item => {
             const childObj = pluginsObj[pluginName][item];
-            if (childObj.path === path || dirname(childObj.path)=== path) {
+            if (childObj.path === path || dirname(childObj.path) === path) {
               parent = pluginName;
             }
           });
@@ -667,50 +721,69 @@ class PackageManager {
     return [null, parent];
   }
 
-  setStatusOrEnableOfNamedPakcage({parent = null, name = '', type = 0, status = '', enable = ''}) {
+  setStatusOrEnableOfNamedPakcage({
+    parent = null,
+    name = '',
+    type = 0,
+    status = '',
+    enable = '',
+  }) {
     let obj = {};
     const oldJSON = this.statusJSONManager.readStatusJSON();
     try {
       if (type === 0) {
-        if (name !== '' && typeof name === 'string' && oldJSON.Project[name][name]) {
+        if (
+          name !== '' &&
+          typeof name === 'string' &&
+          oldJSON.Project[name][name]
+        ) {
           obj = {
             Project: {
               [name]: {
                 [name]: {
                   status,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          };
           if (typeof enable === 'boolean') {
             obj.Project[name][name].enable = enable;
           }
         }
       }
       if (type === 1) {
-        if (parent && typeof parent === 'string' && typeof name === 'string' && oldJSON.Project[parent][name]) {
+        if (
+          parent &&
+          typeof parent === 'string' &&
+          typeof name === 'string' &&
+          oldJSON.Project[parent][name]
+        ) {
           obj = {
             Project: {
               [parent]: {
                 [name]: {
                   status,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          };
           if (typeof enable === 'boolean') {
             obj.Project[parent][name].enable = enable;
           }
-        } else if (!parent && typeof name === 'string' && oldJSON.Plugin[name][name]) {
+        } else if (
+          !parent &&
+          typeof name === 'string' &&
+          oldJSON.Plugin[name][name]
+        ) {
           obj = {
             Plugin: {
               [name]: {
                 [name]: {
                   status,
-                }
-              }
-            }
-          }
+                },
+              },
+            },
+          };
           if (typeof enable === 'boolean') {
             obj.Plugin[name][name].enable = enable;
           }
@@ -731,23 +804,33 @@ class PackageManager {
     return new Promise((resolve, reject) => {
       try {
         if (type === 0) {
-          if (name !== '' && typeof name === 'string' && oldJSON.Project[name]) {
-            rimraf(join(downloadDir, 'Project', name), {}, (err) => {
+          if (
+            name !== '' &&
+            typeof name === 'string' &&
+            oldJSON.Project[name]
+          ) {
+            rimraf(join(downloadDir, 'Project', name), {}, err => {
               if (err) {
                 reject([err, {}]);
               } else {
-                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 0);
+                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(
+                  name,
+                  0
+                );
               }
             });
           }
         }
         if (type === 1) {
           if (name !== '' && typeof name === 'string' && oldJSON.Plugin[name]) {
-            rimraf(join(downloadDir, 'Plugin', name), {}, (err) => {
+            rimraf(join(downloadDir, 'Plugin', name), {}, err => {
               if (err) {
                 reject([err, {}]);
               } else {
-                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 1);
+                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(
+                  name,
+                  1
+                );
               }
             });
           }
@@ -796,7 +879,7 @@ class PackageManager {
 
       packages = {
         Project: packages,
-      }
+      };
 
       this.statusJSONManager.updateStatusJSON(packages);
     }

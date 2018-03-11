@@ -60,12 +60,3 @@ module.exports.getNamedPackageInfoURL = function getNamedPackageInfoURL(
 
   return searchURL;
 };
-
-/**
- * Get whitelist infomation
- * @param {string} url: fengdie h5data json url
- * @returns {Promise<any>}
- */
-module.exports.getWhiteList = function getWhiteList(url) {
-  return module.exports.doRequest(url);
-};
