@@ -13,7 +13,7 @@ class StatusJSONManager {
     this.suffix = suffix;
     this.dlInfoJSONPath = getDownloadInfoJSONPath(this.suffix);
   }
-  static readStatusJSON() {
+  readStatusJSON() {
     let statusJSON;
     if (!existsSync(this.dlInfoJSONPath)) {
       outputJsonSync(this.dlInfoJSONPath, {});
@@ -32,8 +32,8 @@ class StatusJSONManager {
     return statusJSON;
   }
 
-  static updateStatusJSON(data = {}, reset = false) {
-    const oldJSON = StatusJSONManager.readStatusJSON();
+  updateStatusJSON(data = {}, reset = false) {
+    const oldJSON = this.readStatusJSON();
     let newJSON = {};
     if (!reset) {
       newJSON = merge(oldJSON, data);
@@ -45,8 +45,8 @@ class StatusJSONManager {
     return newJSON;
   }
 
-  static deleteAGlobalExtensionFromStatusJSON(name, type) {
-    const oldJSON = StatusJSONManager.readStatusJSON();
+  deleteAGlobalExtensionFromStatusJSON(name, type) {
+    const oldJSON = this.readStatusJSON();
     if (type === 0) {
       delete oldJSON.Project[name];
     }
