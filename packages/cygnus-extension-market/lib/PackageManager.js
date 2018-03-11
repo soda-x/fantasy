@@ -236,7 +236,7 @@ class PackageManager {
    * @returns {Object}
    */
   getInstalledObj(name, type) {
-    const downloadInfo = StatusJSONManager.readStatusJSON();
+    const downloadInfo = this.statusJSONManager.readStatusJSON();
     const dlType = Object.keys(downloadInfo);
     // 存在下载信息
     if (dlType.length) {
@@ -545,9 +545,9 @@ class PackageManager {
         }
       }
       if (!isEmptyObj(dlLocalInfo)) {
-        StatusJSONManager.updateStatusJSON(dlLocalInfo);
+        this.statusJSONManager.updateStatusJSON(dlLocalInfo);
       }
-      ret = [null, StatusJSONManager.readStatusJSON()];
+      ret = [null, this.statusJSONManager.readStatusJSON()];
     } catch (err) {
       ret = [err, null];
     }
@@ -619,9 +619,9 @@ class PackageManager {
         }
       }
       if (!isEmptyObj(dlLocalInfo)) {
-        return StatusJSONManager.updateStatusJSON(dlLocalInfo);
+        return this.statusJSONManager.updateStatusJSON(dlLocalInfo);
       }
-      ret = [null, StatusJSONManager.readStatusJSON()];
+      ret = [null, this.statusJSONManager.readStatusJSON()];
     } catch (err) {
       ret = [err, null];
     }
@@ -634,7 +634,7 @@ class PackageManager {
       return [new Error('path should be absolute'), ''];
     }
     let parent = null;
-    const statusJSON = StatusJSONManager.readStatusJSON();
+    const statusJSON = this.statusJSONManager.readStatusJSON();
     if (!isEmptyObj(statusJSON)) {
       const projectsObj = statusJSON.Project || {};
       const pluginsObj = statusJSON.Plugin || {};
@@ -669,7 +669,7 @@ class PackageManager {
 
   setStatusOrEnableOfNamedPakcage({parent = null, name = '', type = 0, status = '', enable = ''}) {
     let obj = {};
-    const oldJSON = StatusJSONManager.readStatusJSON();
+    const oldJSON = this.statusJSONManager.readStatusJSON();
     try {
       if (type === 0) {
         if (name !== '' && typeof name === 'string' && oldJSON.Project[name][name]) {
@@ -720,12 +720,12 @@ class PackageManager {
       return [err, {}];
     }
 
-    return [null, StatusJSONManager.updateStatusJSON(obj)];
+    return [null, this.statusJSONManager.updateStatusJSON(obj)];
   }
 
   // only support uninstall global, not support like project build-in plugin uninstall
   unInstallAPackage({ name = '', type = 0 }) {
-    const oldJSON = StatusJSONManager.readStatusJSON();
+    const oldJSON = this.statusJSONManager.readStatusJSON();
     const downloadDir = getDownloadDir();
 
     return new Promise((resolve, reject) => {
@@ -736,7 +736,7 @@ class PackageManager {
               if (err) {
                 reject([err, {}]);
               } else {
-                StatusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 0);
+                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 0);
               }
             });
           }
@@ -747,12 +747,12 @@ class PackageManager {
               if (err) {
                 reject([err, {}]);
               } else {
-                StatusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 1);
+                this.statusJSONManager.deleteAGlobalExtensionFromStatusJSON(name, 1);
               }
             });
           }
         }
-        resolve([null, StatusJSONManager.readStatusJSON()]);
+        resolve([null, this.statusJSONManager.readStatusJSON()]);
       } catch (err) {
         reject([err, {}]);
       }
@@ -765,7 +765,7 @@ class PackageManager {
     try {
       rimraf.sync(join(downloadDir, 'Plugin'));
       rimraf.sync(join(downloadDir, 'Project'));
-      StatusJSONManager.updateStatusJSON({}, true);
+      this.statusJSONManager.updateStatusJSON({}, true);
     } catch (e) {
       res = [e, 1];
     }
@@ -798,7 +798,7 @@ class PackageManager {
         Project: packages,
       }
 
-      StatusJSONManager.updateStatusJSON(packages);
+      this.statusJSONManager.updateStatusJSON(packages);
     }
   }
 }
