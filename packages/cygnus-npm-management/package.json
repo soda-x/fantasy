@@ -1,6 +1,6 @@
 {
   "name": "cygnus-npm-management",
-  "version": "1.0.0-0",
+  "version": "1.0.0-1",
   "description": "npm management",
   "main": "index.js",
   "scripts": {},
