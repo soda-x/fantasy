@@ -1,6 +1,6 @@
 {
   "name": "cygnus-env-setup",
-  "version": "1.0.0-0",
+  "version": "0.0.1",
   "description": "node and cnpm setup. Provide a build-in node and cnpm ( yarn or pnpm like).",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "pigcan <jinangjay818@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "cygnus-util": "^1.0.0-0"
+    "cygnus-util": "0.0.1"
   },
   "devDependencies": {
     "ava": "^0.25.0",

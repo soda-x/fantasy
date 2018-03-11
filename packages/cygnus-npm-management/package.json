@@ -1,9 +1,10 @@
 {
   "name": "cygnus-npm-management",
-  "version": "1.0.0-0",
+  "version": "0.0.1",
   "description": "npm management",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+  },
   "author": "pigcan <jinangjay818@gmail.com>",
   "license": "MIT"
 }
