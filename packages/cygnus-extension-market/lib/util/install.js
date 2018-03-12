@@ -3,10 +3,12 @@
 const { dirname } = require('path');
 
 const { setupNodeAndCnpmEnvironment } = require('cygnus-env-setup');
-const { runUtil, logUtil } = require('cygnus-util');
+const { runUtil, logUtil, cnpmUtil, networkUtil } = require('cygnus-util');
 
 const { runCmd } = runUtil;
 const { log } = logUtil;
+const { getRegistry } = cnpmUtil;
+const { isAliEnv } = networkUtil;
 
 /**
  *
@@ -36,6 +38,9 @@ module.exports.install = async function install({
   let cnpmPath = '';
   let errObj;
   try {
+    const isAli = await isAliEnv();
+    const registry = getRegistry(isAli);
+    args.push(`--registry=${registry}`);
     const { cnpm, node } = await setupNodeAndCnpmEnvironment(suffix);
     cnpmPath = cnpm;
     nodePath = dirname(node);
