@@ -37,9 +37,9 @@ function getNodeRemotePath() {
 
 /**
  * setup node and cnpm
- * @param {string} suffix - default 'UNIVERSAL'
+ * @param {string} suffix - default 'BIN'
  */
-function setupNodeAndCnpmEnvironment(suffix) {
+function setupNodeAndCnpmEnvironment(suffix = 'BIN') {
   const isWin32 = os.platform() === 'win32';
   // remote cnpm node url
   const cnpmRemotePath = getEncloseCnpmRemotePath();
