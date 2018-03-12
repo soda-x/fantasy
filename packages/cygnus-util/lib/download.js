@@ -62,14 +62,7 @@ function tryToDownload(
           err.code
         }, download ${url} would like to try again\n`;
         log(info);
-        tryToDownload(
-          url,
-          destination,
-          dlOptions,
-          0,
-          resolve,
-          reject
-        );
+        tryToDownload(url, destination, dlOptions, 0, resolve, reject);
       } else {
         reject(err);
       }
@@ -104,6 +97,7 @@ function download(url = '', destination = '', options = {}) {
           return 10000;
         },
         extract: true,
+        useElectronNet: false,
       });
       tryToDownload(
         url,
