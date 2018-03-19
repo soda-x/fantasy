@@ -322,7 +322,7 @@ class PackageManager {
               } else {
                 delete backupForFilterInstalled.Project[project][name];
               }
-              //packages.Project[project][name].status = 'installing';
+              packages.Project[project][name].enable = pkg.enable;
               packages.Project[project][name].path = pkg.path || '';
               versionsList = packages.Project[project][name].versionsList;
               distTags = packages.Project[project][name]['dist-tags'];
@@ -394,7 +394,7 @@ class PackageManager {
             } else {
               delete backupForFilterInstalled.Plugin[plugin][name];
             }
-            //packages.Plugin[plugin][name].status = 'installing';
+            packages.Plugin[plugin][name].enable = pkg.enable;
             const type = pkg.type;
             const version = pkg.version;
             const aversion = pkg.aversion;
