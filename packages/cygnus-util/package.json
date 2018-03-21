@@ -1,6 +1,6 @@
 {
   "name": "cygnus-util",
-  "version": "1.0.0-2",
+  "version": "1.0.0-3",
   "description": "Some utils that help you with organizing common codes",
   "main": "index.js",
   "scripts": {},
