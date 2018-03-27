@@ -1,12 +1,12 @@
 {
   "name": "cygnus-extension-market",
-  "version": "1.0.0-3",
+  "version": "1.0.0-4",
   "description": "cygnus extension market",
   "main": "index.js",
   "scripts": {},
   "dependencies": {
-    "cygnus-env-setup": "^1.0.0-3",
-    "cygnus-util": "^1.0.0-3",
+    "cygnus-env-setup": "^1.0.0-4",
+    "cygnus-util": "^1.0.0-4",
     "fs-extra": "^5.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.map": "^4.6.0",
