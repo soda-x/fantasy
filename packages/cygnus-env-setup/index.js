@@ -50,7 +50,7 @@ function setupNodeAndCnpmEnvironment(suffix = 'BIN') {
   const nodePath = join(
     downloadDir,
     isWin32
-      ? `node-v9.3.0-win-x64${sep}node-v9.3.0-win-x64${sep}node.exe`
+      ? `node-v9.3.0-win-x64${sep}node.exe`
       : `node-v9.3.0-darwin-x64${sep}bin${sep}node`
   );
 
